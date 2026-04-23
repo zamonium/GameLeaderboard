@@ -416,3 +416,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+#Configuration
+GameLeaderboard.Api/appsettings.Development.json
