@@ -16,21 +16,21 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterRequest request)
+    public async Task<IActionResult> Register(RegisterRequest request, CancellationToken ct)
     {
-        var result = await authService.RegisterAsync(request);
+        var result = await authService.RegisterAsync(request, ct);
         if (!result.Success)
         {
-            return BadRequest(result.Error);
+            return Conflict(result.Error);
         }
-
-        return Ok();
+        
+        return Created();
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken ct)
     {
-        var result = await authService.LoginAsync(request);
+        var result = await authService.LoginAsync(request, ct);
         if (!result.Success)
         {
             return Unauthorized(result.Error);

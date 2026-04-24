@@ -1,40 +1,65 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using GameLeaderboard.Api.Data;
 using GameLeaderboard.Api.DTOs;
 using GameLeaderboard.Api.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GameLeaderboard.Api.Services;
 
 public class AuthService : IAuthService
 {
+    private readonly GameLeaderboardContext dbContext;
     private readonly IConfiguration config;
+    private readonly IPasswordHasher<User> passwordHasher;
 
-    public AuthService(IConfiguration config)
+    public AuthService(GameLeaderboardContext dbContext, IConfiguration config, IPasswordHasher<User> passwordHasher)
     {
+        this.dbContext = dbContext;
         this.config = config;
+        this.passwordHasher = passwordHasher;
     }
     
-    public async Task<RegisterResult> RegisterAsync(RegisterRequest request)
+    public async Task<RegisterResult> RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
-        //check if user exists
+        var exist = await dbContext.Users.AnyAsync(user => user.Email == request.Email, ct);
 
-        //hash password
+        if(exist)
+        {
+            return RegisterResult.Fail("Email already in use");
+        }
 
-        //create and save user
+        var user = new User
+        {
+            Email = request.Email,
+            Username = request.Username,
+        };
+        user.SetPassword(request.Password, passwordHasher);
+
+        dbContext.Users.Add(user);
+        await dbContext.SaveChangesAsync(ct);
 
         return RegisterResult.Ok();
     }
 
-    public async Task<LoginResult> LoginAsync(LoginRequest request)
+    public async Task<LoginResult> LoginAsync(LoginRequest request, CancellationToken ct)
     {
-        //find user
+        var user = await dbContext.Users.FirstOrDefaultAsync(user => user.Email == request.Email, ct);
 
-        //verify password
+        if(user == null)
+        {
+            return LoginResult.Fail("Invalid credentials");
+        }
 
-        //generate token
-        User user = new User(){ Id = 1, Email = request.Email};
+        var passwordVerification = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+        if(passwordVerification == PasswordVerificationResult.Failed)
+        {
+            return LoginResult.Fail("Invalid credentials");
+        }
+
         var token = GenerateToken(user);
 
         return LoginResult.Ok(token);

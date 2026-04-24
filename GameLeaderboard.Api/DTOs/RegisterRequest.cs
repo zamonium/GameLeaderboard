@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace GameLeaderboard.Api.DTOs;
 
 public record RegisterRequest(
-    string Username,
-    string Email,
-    string Password
+    [Required] [StringLength(50)] string Username,
+    [Required] [StringLength(50)] string Email,
+    [Required] [StringLength(50)] string Password
 );
