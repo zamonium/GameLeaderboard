@@ -419,3 +419,9 @@ FodyWeavers.xsd
 
 #Configuration
 GameLeaderboard.Api/appsettings.Development.json
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite

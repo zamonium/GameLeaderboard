@@ -2,7 +2,7 @@ POST http://localhost:5149/api/auth/login
 Content-Type: application/json
 
 {
-    "email": "situ@test.com",
+    "email": "test@test.com",
     "password": "testPwd"
 }
 
@@ -12,8 +12,8 @@ POST http://localhost:5149/api/auth/register
 Content-Type: application/json
 
 {
-    "email": "situ@test.com",
-    "username": "situ",
+    "email": "test@test.com",
+    "username": "test",
     "password": "testPwd"
 }
 
