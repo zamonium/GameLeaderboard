@@ -11,4 +11,5 @@ public class GameLeaderboardContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Score> Scores => Set<Score>();
 }

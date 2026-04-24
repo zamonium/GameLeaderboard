@@ -16,20 +16,25 @@ builder.Services.AddSqlite<GameLeaderboardContext>(connString);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-   options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-   {
+    //options.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "Enter your JWT token"
-   });
+    });
+    
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
+builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -57,6 +62,9 @@ else
 {
     app.UseHttpsRedirection();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

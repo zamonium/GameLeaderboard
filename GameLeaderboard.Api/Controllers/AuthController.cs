@@ -1,11 +1,11 @@
-using GameLeaderboard.Api.DTOs;
+using GameLeaderboard.Api.DTOs.Auth;
 using GameLeaderboard.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameLeaderboard.Api.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
+[ApiController]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService authService;

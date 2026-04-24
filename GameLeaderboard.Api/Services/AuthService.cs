@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using GameLeaderboard.Api.Data;
-using GameLeaderboard.Api.DTOs;
+using GameLeaderboard.Api.DTOs.Auth;
 using GameLeaderboard.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
