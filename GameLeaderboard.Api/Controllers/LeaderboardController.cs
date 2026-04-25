@@ -32,12 +32,34 @@ namespace GameLeaderboard.Api.Controllers
             return Ok(result.Score);
         }
 
-        [HttpGet("{amount}")]
+        [HttpGet("scores")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetScores(int amount, CancellationToken ct)
+        public async Task<IActionResult> GetAllScores([FromQuery] GetAllScoresRequest request, CancellationToken ct)
         {
-            var result = await leaderboardService.GetScoresAsync(amount, ct);
-            return Ok(result);
+            var result = await leaderboardService.GetAllScoresAsync(request, ct);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result.Data);
+        }
+
+        [HttpGet("my-scores")]
+        public async Task<IActionResult> GetUserScores([FromQuery] GetUserScoresRequest request, CancellationToken ct)
+        {
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            if(username == null)
+            {
+                return Unauthorized();    
+            }
+
+            var result = await leaderboardService.GetUserScoresAsync(username, request, ct);
+            if (!result.Success)
+            {
+                return BadRequest(result.Error);
+            }
+
+            return Ok(result.Data);
         }
 
         [HttpPost("submit")]
@@ -47,7 +69,7 @@ namespace GameLeaderboard.Api.Controllers
             var result = await leaderboardService.SubmitScore(userId, request, ct);
             if (!result.Success)
             {
-                //return ???
+                return BadRequest(result.Error);
             }
 
             return CreatedAtAction(
