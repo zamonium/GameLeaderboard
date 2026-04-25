@@ -5,30 +5,13 @@ using GameLeaderboard.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
+using NSwag.Generation.Processors.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connString = builder.Configuration.GetConnectionString("GameStore");
 builder.Services.AddSqlite<GameLeaderboardContext>(connString);
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    //options.CustomSchemaIds(id => id.FullName!.Replace('+', '-'));
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter your JWT token"
-    });
-    
-});
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -46,16 +29,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = false,
             ValidateAudience = false
         };
-    });
+    }
+);
 
 builder.Services.AddControllers();
+
+builder.Services.AddOpenApiDocument(options =>
+{
+    options.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
+    {
+        Type         = NSwag.OpenApiSecuritySchemeType.Http,
+        Scheme       = "bearer",
+        BearerFormat = "JWT",
+        Description  = "Enter your JWT token."
+    });
+    options.OperationProcessors.Add(
+        new AspNetCoreOperationSecurityScopeProcessor("Bearer")
+    );
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.UseOpenApi();
     app.UseSwaggerUI();
 }
 else
