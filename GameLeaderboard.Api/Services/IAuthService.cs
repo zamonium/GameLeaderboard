@@ -1,4 +1,4 @@
-using GameLeaderboard.Api.DTOs;
+using GameLeaderboard.Api.DTOs.Auth;
 
 namespace GameLeaderboard.Api.Services;
 

@@ -1,4 +1,4 @@
-namespace GameLeaderboard.Api.DTOs;
+namespace GameLeaderboard.Api.DTOs.Auth;
 
 public class LoginResult
 {
