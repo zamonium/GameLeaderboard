@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameLeaderboard.Api.Data.Migrations
 {
     [DbContext(typeof(GameLeaderboardContext))]
-    [Migration("20260424140836_AddUsers")]
-    partial class AddUsers
+    [Migration("20260427131710_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
