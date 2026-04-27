@@ -17,7 +17,7 @@ public class LeaderboardService : ILeaderboardService
 
     public async Task<GetScoreResult> GetScoreAsync(int id, CancellationToken ct)
     {
-        var score = await dbContext.Scores.FirstOrDefaultAsync(s => s.Id == id);
+        var score = await dbContext.Scores.FirstOrDefaultAsync(s => s.Id == id, ct);
 
         if(score == null)
         {
@@ -33,7 +33,7 @@ public class LeaderboardService : ILeaderboardService
         return GetScoreResult.Ok(scoreDetails);
     }
 
-    public async Task<GetScoresResult> GetAllScoresAsync(GetAllScoresRequest request, CancellationToken ct)
+    public async Task<GetScoresResult> GetAllScoresAsync(GetScoresRequest request, CancellationToken ct)
     {
         var query = dbContext.Scores
             .AsNoTracking()
@@ -67,7 +67,7 @@ public class LeaderboardService : ILeaderboardService
         return GetScoresResult.Ok(pagedResult);
     }
 
-    public async Task<GetScoresResult> GetUserScoresAsync(string username, GetUserScoresRequest request, CancellationToken ct)
+    public async Task<GetScoresResult> GetUserScoresAsync(string username, GetScoresRequest request, CancellationToken ct)
     {
         var query = dbContext.Scores
             .AsNoTracking()
@@ -78,7 +78,7 @@ public class LeaderboardService : ILeaderboardService
         query = request.SortBy?.ToLower() switch
         {
             "amount" => request.Desc ? query.OrderByDescending(s => s.Amount) : query.OrderBy(s => s.Amount),
-            "createdAt" => request.Desc ? query.OrderByDescending(s => s.CreatedAt) : query.OrderBy(s => s.CreatedAt),
+            "createdat" => request.Desc ? query.OrderByDescending(s => s.CreatedAt) : query.OrderBy(s => s.CreatedAt),
             _ => query.OrderByDescending(s => s.Amount)
         };
 
@@ -102,7 +102,7 @@ public class LeaderboardService : ILeaderboardService
 
     public async Task<SubmitScoreResult> SubmitScore(int userId, SubmitScoreRequest request, CancellationToken ct)
     {
-        if(userId < 0)
+        if(userId <= 0)
         {
             return SubmitScoreResult.Fail("Wrong userId");    
         }

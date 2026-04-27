@@ -10,7 +10,7 @@ using NSwag.Generation.Processors.Security;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connString = builder.Configuration.GetConnectionString("GameStore");
+var connString = builder.Configuration.GetConnectionString("GameLeaderboard");
 builder.Services.AddSqlite<GameLeaderboardContext>(connString);
 
 builder.Services.AddScoped<IAuthService, AuthService>();

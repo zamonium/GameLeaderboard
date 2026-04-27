@@ -21,7 +21,8 @@ namespace GameLeaderboard.Api.Controllers
         }
 
         [HttpGet("score/{id}", Name = GetScoreEndpointName)]
-        public async Task<IActionResult> GetScore(int id, CancellationToken ct)
+        [AllowAnonymous]
+        public async Task<IActionResult> GetScore([FromRoute] int id, CancellationToken ct)
         {
             var result = await leaderboardService.GetScoreAsync(id, ct);
             if (!result.Success)
@@ -34,7 +35,7 @@ namespace GameLeaderboard.Api.Controllers
 
         [HttpGet("scores")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAllScores([FromQuery] GetAllScoresRequest request, CancellationToken ct)
+        public async Task<IActionResult> GetAllScores([FromQuery] GetScoresRequest request, CancellationToken ct)
         {
             var result = await leaderboardService.GetAllScoresAsync(request, ct);
             if (!result.Success)
@@ -45,7 +46,7 @@ namespace GameLeaderboard.Api.Controllers
         }
 
         [HttpGet("my-scores")]
-        public async Task<IActionResult> GetUserScores([FromQuery] GetUserScoresRequest request, CancellationToken ct)
+        public async Task<IActionResult> GetUserScores([FromQuery] GetScoresRequest request, CancellationToken ct)
         {
             var username = User.FindFirst(ClaimTypes.Name)?.Value;
             if(username == null)
@@ -63,10 +64,15 @@ namespace GameLeaderboard.Api.Controllers
         }
 
         [HttpPost("submit")]
-        public async Task<IActionResult> SubmitScore(SubmitScoreRequest request, CancellationToken ct)
+        public async Task<IActionResult> SubmitScore([FromBody] SubmitScoreRequest request, CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            var result = await leaderboardService.SubmitScore(userId, request, ct);
+            var userId = TryGetCurrentUserId();
+            if(userId is null)
+            {
+                return Unauthorized("User identity could not be resolved");
+            }
+
+            var result = await leaderboardService.SubmitScore(userId.Value, request, ct);
             if (!result.Success)
             {
                 return BadRequest(result.Error);
@@ -79,10 +85,14 @@ namespace GameLeaderboard.Api.Controllers
             );
         }
 
-        private int GetCurrentUserId()
+        private int? TryGetCurrentUserId()
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            return int.Parse(claim!.Value);
+            if(claim == null || !int.TryParse(claim.Value, out var id))
+            {
+                return null;
+            }
+            return id;
         }
     }
 }
