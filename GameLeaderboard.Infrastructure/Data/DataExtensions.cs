@@ -25,7 +25,7 @@ public static class DataExtensions
         var jwtSection = config.GetSection("Jwt");
 
         services.Configure<JwtSettings>(jwtSection);
-        services.AddSqlite<GameLeaderboardContext>(connString);
+        services.AddSqlServer<GameLeaderboardContext>(connString);
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<ILeaderboardService, LeaderboardService>();
