@@ -1,2 +1,2 @@
 # GameLeaderboard
-Implementation of a game leaderboard web API with ASP.NET Core
+REST API for game scores and leaderboards. ASP.NET Core 8, EF Core, JWT auth, SQL Server. Built as a portfolio piece during transition from Unity to .NET backend.
