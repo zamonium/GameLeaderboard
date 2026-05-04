@@ -1,5 +1,5 @@
-using GameLeaderboard.Api.DTOs.Auth;
-using GameLeaderboard.Api.Services;
+using GameLeaderboard.Infrastructure.DTOs.Auth;
+using GameLeaderboard.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameLeaderboard.Api.Controllers;

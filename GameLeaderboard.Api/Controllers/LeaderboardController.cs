@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using GameLeaderboard.Api.DTOs.Leaderboard;
-using GameLeaderboard.Api.Services;
+using GameLeaderboard.Infrastructure.DTOs.Leaderboard;
+using GameLeaderboard.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

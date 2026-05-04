@@ -1,36 +1,13 @@
-using System.Text;
-using GameLeaderboard.Api.Data;
-using GameLeaderboard.Api.Models;
-using GameLeaderboard.Api.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
+using GameLeaderboard.Infrastructure.Data;
 using NSwag.Generation.Processors.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connString = builder.Configuration.GetConnectionString("GameLeaderboard");
-builder.Services.AddSqlite<GameLeaderboardContext>(connString);
-
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+builder.Services.AddInfrastructure(builder.Configuration, connString!);
 
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
-    }
-);
 
 builder.Services.AddControllers();
 
@@ -66,6 +43,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MigrateDb();
+app.Services.MigrateDb();
 
 app.Run();
