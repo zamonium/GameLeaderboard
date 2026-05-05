@@ -3,16 +3,19 @@ using GameLeaderboard.Infrastructure.DTOs;
 using GameLeaderboard.Infrastructure.DTOs.Leaderboard;
 using GameLeaderboard.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GameLeaderboard.Infrastructure.Services;
 
 public class LeaderboardService : ILeaderboardService
 {
     private readonly GameLeaderboardContext dbContext;
+    private readonly ILogger<LeaderboardService> logger;
 
-    public LeaderboardService(GameLeaderboardContext dbContext)
+    public LeaderboardService(GameLeaderboardContext dbContext, ILogger<LeaderboardService> logger)
     {
         this.dbContext = dbContext;
+        this.logger = logger;
     }
 
     public async Task<GetScoreResult> GetScoreAsync(int id, CancellationToken ct)
@@ -116,6 +119,8 @@ public class LeaderboardService : ILeaderboardService
 
         dbContext.Scores.Add(score);
         await dbContext.SaveChangesAsync(ct);
+
+        logger.LogInformation("Score {Amount} submitted for user {UserId}", request.Amount, userId);
 
         ScoreDetails scoreDto = new(
             score.Id,

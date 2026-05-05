@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using GameLeaderboard.Infrastructure.Settings;
+using Microsoft.Extensions.Logging;
 
 namespace GameLeaderboard.Infrastructure.Services;
 
@@ -17,12 +18,17 @@ public class AuthService : IAuthService
     private readonly GameLeaderboardContext dbContext;
     private readonly IOptions<JwtSettings> jwtOptions;
     private readonly IPasswordHasher<User> passwordHasher;
+    private readonly ILogger<AuthService> logger;
 
-    public AuthService(GameLeaderboardContext dbContext, IOptions<JwtSettings> jwtOptions, IPasswordHasher<User> passwordHasher)
+    public AuthService(GameLeaderboardContext dbContext, 
+        IOptions<JwtSettings> jwtOptions, 
+        IPasswordHasher<User> passwordHasher,
+        ILogger<AuthService> logger)
     {
         this.dbContext = dbContext;
         this.jwtOptions = jwtOptions;
         this.passwordHasher = passwordHasher;
+        this.logger = logger;
     }
     
     public async Task<RegisterResult> RegisterAsync(RegisterRequest request, CancellationToken ct)
@@ -31,6 +37,7 @@ public class AuthService : IAuthService
 
         if(exist)
         {
+            logger.LogWarning("Registration failed for {Email} - email already in use", request.Email);
             return RegisterResult.Fail("Email already in use");
         }
 
@@ -44,6 +51,7 @@ public class AuthService : IAuthService
         dbContext.Users.Add(user);
         await dbContext.SaveChangesAsync(ct);
 
+        logger.LogInformation("User {Email} registered successfully", request.Email);
         return RegisterResult.Ok();
     }
 
@@ -53,17 +61,20 @@ public class AuthService : IAuthService
 
         if(user == null)
         {
+            logger.LogWarning("Login failed for {Email} - user not found", request.Email);
             return LoginResult.Fail("Invalid credentials");
         }
 
         var passwordVerification = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if(passwordVerification == PasswordVerificationResult.Failed)
         {
+            logger.LogWarning("Login failed for {Email} - wrong password", request.Email);
             return LoginResult.Fail("Invalid credentials");
         }
 
         var token = GenerateToken(user);
 
+        logger.LogInformation("User {Email} logged in successfully", request.Email);
         return LoginResult.Ok(token);
     }
 
