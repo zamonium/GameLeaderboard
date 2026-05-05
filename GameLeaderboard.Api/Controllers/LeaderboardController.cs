@@ -25,11 +25,6 @@ namespace GameLeaderboard.Api.Controllers
         public async Task<IActionResult> GetScore([FromRoute] int id, CancellationToken ct)
         {
             var result = await leaderboardService.GetScoreAsync(id, ct);
-            if (!result.Success)
-            {
-                return BadRequest(result.Error);
-            }
-
             return Ok(result.Score);
         }
 
@@ -73,11 +68,6 @@ namespace GameLeaderboard.Api.Controllers
             }
 
             var result = await leaderboardService.SubmitScore(userId.Value, request, ct);
-            if (!result.Success)
-            {
-                return BadRequest(result.Error);
-            }
-
             return CreatedAtAction(
                 GetScoreEndpointName, 
                 new {Id = result.Score!.Id}, 
