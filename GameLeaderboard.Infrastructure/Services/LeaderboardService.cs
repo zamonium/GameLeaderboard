@@ -21,7 +21,7 @@ public class LeaderboardService : ILeaderboardService
 
         if(score == null)
         {
-            return GetScoreResult.Fail($"No score found with id {id}");
+            throw new KeyNotFoundException($"No score found with id {id}");
         }
 
         var scoreDetails = new ScoreDetails(
@@ -104,7 +104,7 @@ public class LeaderboardService : ILeaderboardService
     {
         if(userId <= 0)
         {
-            return SubmitScoreResult.Fail("Wrong userId");    
+            throw new ArgumentException("userId must be greater than 0", nameof(userId));
         }
 
         var score = new Score
