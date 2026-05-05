@@ -1,54 +1,82 @@
 using GameLeaderboard.Api.Exceptions;
 using GameLeaderboard.Infrastructure.Data;
 using NSwag.Generation.Processors.Security;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-// Add services to the container.
-var connString = builder.Configuration.GetConnectionString("GameLeaderboard");
-builder.Services.AddInfrastructure(builder.Configuration, connString!);
-
-builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-
-builder.Services.AddAuthorization();
-
-builder.Services.AddControllers();
-
-builder.Services.AddOpenApiDocument(options =>
+try
 {
-    options.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
+    Log.Information("Starting GameLeaderboard API");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog((context, services, configuration) =>
+        configuration.ReadFrom.Configuration(context.Configuration)
+                     .ReadFrom.Services(services));
+
+    // Add services to the container.
+    var connString = builder.Configuration.GetConnectionString("GameLeaderboard");
+    builder.Services.AddInfrastructure(builder.Configuration, connString!);
+
+    builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+    builder.Services.AddAuthorization();
+
+    builder.Services.AddControllers();
+
+    builder.Services.AddOpenApiDocument(options =>
     {
-        Type         = NSwag.OpenApiSecuritySchemeType.Http,
-        Scheme       = "bearer",
-        BearerFormat = "JWT",
-        Description  = "Enter your JWT token."
+        options.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
+        {
+            Type         = NSwag.OpenApiSecuritySchemeType.Http,
+            Scheme       = "bearer",
+            BearerFormat = "JWT",
+            Description  = "Enter your JWT token."
+        });
+        options.OperationProcessors.Add(
+            new AspNetCoreOperationSecurityScopeProcessor("Bearer")
+        );
     });
-    options.OperationProcessors.Add(
-        new AspNetCoreOperationSecurityScopeProcessor("Bearer")
-    );
-});
 
-var app = builder.Build();
+    var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseOpenApi();
-    app.UseSwaggerUI();
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.MessageTemplate = 
+            "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+    });
+
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseOpenApi();
+        app.UseSwaggerUI();
+    }
+    else
+    {
+        app.UseHttpsRedirection();
+    }
+
+    app.UseExceptionHandler();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Services.MigrateDb();
+
+    app.Run();
 }
-else
+catch(Exception ex) when (ex is not HostAbortedException)
 {
-    app.UseHttpsRedirection();
+    Log.Fatal(ex, "Application terminated unexpectedly");
 }
-
-app.UseExceptionHandler();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Services.MigrateDb();
-
-app.Run();
+finally
+{
+    Log.CloseAndFlush();
+}
