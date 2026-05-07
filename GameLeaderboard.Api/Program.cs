@@ -1,5 +1,9 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using GameLeaderboard.Api.Exceptions;
 using GameLeaderboard.Infrastructure.Data;
+using GameLeaderboard.Infrastructure.Validators.Auth;
+using Microsoft.AspNetCore.Mvc;
 using NSwag.Generation.Processors.Security;
 using Serilog;
 
@@ -26,7 +30,21 @@ try
 
     builder.Services.AddAuthorization();
 
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+        .ConfigureApiBehaviorOptions(options =>
+        {
+            options.InvalidModelStateResponseFactory = context =>
+            {
+                var problemDetails = new ValidationProblemDetails(context.ModelState)
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "One or more validation errors occurred",
+                    Instance = context.HttpContext.Request.Path
+                };
+
+                return new BadRequestObjectResult(problemDetails);
+            };
+        });
 
     builder.Services.AddOpenApiDocument(options =>
     {
@@ -41,6 +59,9 @@ try
             new AspNetCoreOperationSecurityScopeProcessor("Bearer")
         );
     });
+
+    builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+    builder.Services.AddFluentValidationAutoValidation();
 
     var app = builder.Build();
 
