@@ -2,4 +2,5 @@
   <Project Path="GameLeaderboard.Api/GameLeaderboard.Api.csproj" />
   <Project Path="GameLeaderboard.Domain/GameLeaderboard.Domain.csproj" />
   <Project Path="GameLeaderboard.Infrastructure/GameLeaderboard.Infrastructure.csproj" />
+  <Project Path="GameLeaderboard.UnitTests/GameLeaderboard.UnitTests.csproj" />
 </Solution>
