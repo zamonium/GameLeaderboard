@@ -27,6 +27,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Helpers\" />
+    <Folder Include="Services\" />
     <Folder Include="Validators\" />
     <Folder Include="Validators\Auth\" />
     <Folder Include="Validators\Leaderboard\" />
