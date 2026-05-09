@@ -23,19 +23,20 @@ public class LeaderboardServiceTests
     public async Task GetScoreAsync_should_return_score_when_present()
     {
         await using var db = TestDbContextFactory.Create();
-        db.Scores.Add(new Domain.Entities.Score{Amount = 100, CreatedAt = DateTime.UtcNow});
+        var score = new Score{Amount = 100, CreatedAt = DateTime.UtcNow};
+        db.Scores.Add(score);
         await db.SaveChangesAsync();
 
         var service = new LeaderboardService(db, NullLogger<LeaderboardService>.Instance);
 
-        var result = await service.GetScoreAsync(id: 1, CancellationToken.None);
+        var result = await service.GetScoreAsync(id: score.Id, CancellationToken.None);
 
         result.Score.Should().NotBeNull();
         result.Score.Amount.Should().Be(100);
     }
 
     [Fact]
-    public async Task SubmitScore_shoul_persist_a_new_score()
+    public async Task SubmitScore_should_persist_a_new_score()
     {
         await using var db = TestDbContextFactory.Create();
         var service = new LeaderboardService(db, NullLogger<LeaderboardService>.Instance);
