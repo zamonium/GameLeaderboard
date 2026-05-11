@@ -27,3 +27,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hc
     "amount": 30,
     "createdAt": "2026-04-24T14:18:23.573Z"
 }
+
+###
+
+GET http://localhost:5149/api/leaderboard/score/2
