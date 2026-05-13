@@ -4,6 +4,7 @@ using GameLeaderboard.Api.Exceptions;
 using GameLeaderboard.Infrastructure.Data;
 using GameLeaderboard.Infrastructure.Validators.Auth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NSwag.Generation.Processors.Security;
 using Serilog;
 
@@ -22,8 +23,16 @@ try
                      .ReadFrom.Services(services));
 
     // Add services to the container.
-    var connString = builder.Configuration.GetConnectionString("GameLeaderboard");
-    builder.Services.AddInfrastructure(builder.Configuration, connString!);
+    if (!builder.Environment.IsEnvironment("Testing"))
+    {
+        var connString = builder.Configuration.GetConnectionString("GameLeaderboard");
+        builder.Services.AddInfrastructure(builder.Configuration,
+            options => options.UseSqlServer(connString));
+    }
+    else
+    {
+        builder.Services.AddInfrastructure(builder.Configuration);
+    }
 
     builder.Services.AddProblemDetails();
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -89,7 +98,10 @@ try
 
     app.MapControllers();
 
-    app.Services.MigrateDb();
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        app.Services.MigrateDb();
+    }
 
     app.Run();
 }
