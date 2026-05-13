@@ -20,12 +20,16 @@ public static class DataExtensions
         dbContext.Database.Migrate();
     }
 
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config, string connString)
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration config,
+        Action<DbContextOptionsBuilder>? dbContextOptions = null)
     {
         var jwtSection = config.GetSection("Jwt");
 
         services.Configure<JwtSettings>(jwtSection);
-        services.AddSqlServer<GameLeaderboardContext>(connString);
+        if (dbContextOptions is not null)
+            services.AddDbContext<GameLeaderboardContext>(dbContextOptions);
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<ILeaderboardService, LeaderboardService>();
