@@ -56,8 +56,6 @@ dotnet test GameLeaderboard.IntegrationTests
 
 These boot the real ASP.NET Core pipeline in memory and make HTTP calls against it. The database is replaced with SQLite `:memory:` so no external setup is required.
 
-For the full explanation of how the integration test setup works (factory, environment, schema creation, etc.), see [`GameLeaderboard.IntegrationTests/README.md`](GameLeaderboard.IntegrationTests/README.md).
-
 ## Running the API
 
 The environment (`Development` or `Production`) is selected via `ASPNETCORE_ENVIRONMENT`, which is set in `GameLeaderboard.Api/Properties/launchSettings.json`. Change the value of the profile you want to use, or duplicate the profile and create a `Production` one.
